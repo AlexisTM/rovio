@@ -60,7 +60,13 @@
 #define ROVIO_NPOSE 0
 #endif
 
-typedef rovio::RovioFilter<rovio::FilterState<ROVIO_NMAXFEATURE, ROVIO_NLEVELS, ROVIO_PATCHSIZE, ROVIO_NCAM, ROVIO_NPOSE>> mtFilter;
+static int nMax_ = ROVIO_NMAXFEATURE;
+static int nLevels_ = ROVIO_NLEVELS;
+static int patchSize_ = ROVIO_PATCHSIZE;
+static int nCam_ = ROVIO_NCAM;
+static int nPose_ = ROVIO_NPOSE;
+
+typedef rovio::RovioFilter<rovio::FilterState<nMax_, nLevels_, patchSize_, nCam_, nPose_>> mtFilter;
 
 static rovio::RovioScene<mtFilter> mRovioScene;
 
@@ -77,7 +83,6 @@ int main(int argc, char** argv){
   std::string rootdir = ros::package::getPath("rovio"); // Leaks memory
   std::string filter_config = rootdir + "/cfg/rovio.info";
 
-  static int nMax_, nLevels_, patchSize_, nCam_, nPose_;
   static bool make_scene_;
   nh.param("features", nMax_, ROVIO_NMAXFEATURE); // Maximal number of considered features in the filter state.
   nh.param("nlevel", nLevels_, ROVIO_NLEVELS); // Total number of pyramid levels considered.
