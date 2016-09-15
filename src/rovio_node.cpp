@@ -42,37 +42,25 @@
 #include "rovio/RovioScene.hpp"
 #endif
 
-#ifdef ROVIO_NMAXFEATURE
-static constexpr int nMax_ = ROVIO_NMAXFEATURE;
-#else
-static constexpr int nMax_ = 25; // Maximal number of considered features in the filter state.
+#ifndef ROVIO_NMAXFEATURE
+#define ROVIO_NMAXFEATURE 25
 #endif
 
-#ifdef ROVIO_NLEVELS
-static constexpr int nLevels_ = ROVIO_NLEVELS;
-#else
-static constexpr int nLevels_ = 4; // // Total number of pyramid levels considered.
+#ifndef ROVIO_NLEVELS
+#define ROVIO_NLEVELS 4
 #endif
 
-#ifdef ROVIO_PATCHSIZE
-static constexpr int patchSize_ = ROVIO_PATCHSIZE;
-#else
-static constexpr int patchSize_ = 6; // Edge length of the patches (in pixel). Must be a multiple of 2!
+#ifndef ROVIO_PATCHSIZE
+#define ROVIO_PATCHSIZE 6
 #endif
 
-#ifdef ROVIO_NCAM
-static constexpr int nCam_ = ROVIO_NCAM;
-#else
-static constexpr int nCam_ = 1; // Used total number of cameras.
+#ifndef ROVIO_NCAM
+#define ROVIO_NCAM 1
 #endif
 
-#ifdef ROVIO_NPOSE
-static constexpr int nPose_ = ROVIO_NPOSE;
-#else
-static constexpr int nPose_ = 0; // Additional pose states.
+#ifndef ROVIO_NPOSE
+#define ROVIO_NPOSE 0
 #endif
-
-typedef rovio::RovioFilter<rovio::FilterState<nMax_,nLevels_,patchSize_,nCam_,nPose_>> mtFilter;
 
 #ifdef MAKE_SCENE
 static rovio::RovioScene<mtFilter> mRovioScene;
@@ -90,6 +78,15 @@ int main(int argc, char** argv){
 
   std::string rootdir = ros::package::getPath("rovio"); // Leaks memory
   std::string filter_config = rootdir + "/cfg/rovio.info";
+
+  static int nMax_, nLevels_, patchSize_, nCam_, nPose_;
+  nh.param("features", nMax_, ROVIO_NMAXFEATURE); // Maximal number of considered features in the filter state.
+  nh.param("nlevel", nLevels_, ROVIO_NLEVELS); // Total number of pyramid levels considered.
+  nh.param("patchsize", patchSize_, ROVIO_PATCHSIZE); // Edge length of the patches (in pixel). Must be a multiple of 2!
+  nh.param("ncam", nCam_, ROVIO_NCAM); // Used total number of cameras.
+  nh.param("npose", nPose_, ROVIO_NPOSE); // Additional pose states.
+
+  typedef rovio::RovioFilter<rovio::FilterState<nMax_, nLevels_, patchSize_, nCam_, nPose_>> mtFilter;
 
   nh_private.param("filter_config", filter_config, filter_config);
 
