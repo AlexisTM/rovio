@@ -38,9 +38,7 @@
 
 #include "rovio/RovioFilter.hpp"
 #include "rovio/RovioNode.hpp"
-#ifdef MAKE_SCENE
 #include "rovio/RovioScene.hpp"
-#endif
 
 #ifndef ROVIO_NMAXFEATURE
 #define ROVIO_NMAXFEATURE 25
@@ -62,14 +60,12 @@
 #define ROVIO_NPOSE 0
 #endif
 
-#ifdef MAKE_SCENE
 static rovio::RovioScene<mtFilter> mRovioScene;
 
 void idleFunc(){
   ros::spinOnce();
   mRovioScene.drawScene(mRovioScene.mpFilter_->safe_);
 }
-#endif
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "rovio");
@@ -80,11 +76,13 @@ int main(int argc, char** argv){
   std::string filter_config = rootdir + "/cfg/rovio.info";
 
   static int nMax_, nLevels_, patchSize_, nCam_, nPose_;
+  static bool make_scene_;
   nh.param("features", nMax_, ROVIO_NMAXFEATURE); // Maximal number of considered features in the filter state.
   nh.param("nlevel", nLevels_, ROVIO_NLEVELS); // Total number of pyramid levels considered.
   nh.param("patchsize", patchSize_, ROVIO_PATCHSIZE); // Edge length of the patches (in pixel). Must be a multiple of 2!
   nh.param("ncam", nCam_, ROVIO_NCAM); // Used total number of cameras.
   nh.param("npose", nPose_, ROVIO_NPOSE); // Additional pose states.
+  nh.param("makescene", make_scene_, false); // do we make the scene
 
   typedef rovio::RovioFilter<rovio::FilterState<nMax_, nLevels_, patchSize_, nCam_, nPose_>> mtFilter;
 
@@ -108,16 +106,18 @@ int main(int argc, char** argv){
   rovio::RovioNode<mtFilter> rovioNode(nh, nh_private, mpFilter);
   rovioNode.makeTest();
 
-#ifdef MAKE_SCENE
-  // Scene
-  std::string mVSFileName = rootdir + "/shaders/shader.vs";
-  std::string mFSFileName = rootdir + "/shaders/shader.fs";
-  mRovioScene.initScene(argc,argv,mVSFileName,mFSFileName,mpFilter);
-  mRovioScene.setIdleFunction(idleFunc);
-  mRovioScene.addKeyboardCB('r',[&rovioNode]() mutable {rovioNode.requestReset();});
-  glutMainLoop();
-#else
-  ros::spin();
-#endif
+  if (make_scene_) {
+    // Scene
+    std::string mVSFileName = rootdir + "/shaders/shader.vs";
+    std::string mFSFileName = rootdir + "/shaders/shader.fs";
+    mRovioScene.initScene(argc, argv, mVSFileName, mFSFileName, mpFilter);
+    mRovioScene.setIdleFunction(idleFunc);
+    mRovioScene.addKeyboardCB('r', [&rovioNode]() mutable {rovioNode.requestReset(); });
+    glutMainLoop();
+  }
+  else {
+    ros::spin();
+  }
+  
   return 0;
 }
