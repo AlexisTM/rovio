@@ -60,6 +60,8 @@
 #define ROVIO_NPOSE 0
 #endif
 
+typedef rovio::RovioFilter<rovio::FilterState<ROVIO_NMAXFEATURE, ROVIO_NLEVELS, ROVIO_PATCHSIZE, ROVIO_NCAM, ROVIO_NPOSE>> mtFilter;
+
 static rovio::RovioScene<mtFilter> mRovioScene;
 
 void idleFunc(){
@@ -84,7 +86,6 @@ int main(int argc, char** argv){
   nh.param("npose", nPose_, ROVIO_NPOSE); // Additional pose states.
   nh.param("makescene", make_scene_, false); // do we make the scene
 
-  typedef rovio::RovioFilter<rovio::FilterState<nMax_, nLevels_, patchSize_, nCam_, nPose_>> mtFilter;
 
   nh_private.param("filter_config", filter_config, filter_config);
 
